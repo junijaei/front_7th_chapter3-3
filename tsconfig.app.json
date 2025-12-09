@@ -24,8 +24,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/ui": ["./src/shared/ui"],
-      "@shared/utils": ["./src/shared/utils"],
       "@shared": ["./src/shared"],
       "@shared/*": ["./src/shared/*"],
       "@entities": ["./src/entities"],

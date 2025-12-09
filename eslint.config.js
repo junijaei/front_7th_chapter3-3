@@ -28,7 +28,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'no-relative-import-paths/no-relative-import-paths': [
         'error',
-        { allowSameFolder: false, rootDir: 'src', prefix: '@' },
+        { allowSameFolder: true, rootDir: 'src', prefix: '@' },
       ],
       'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
