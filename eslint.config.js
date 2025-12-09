@@ -1,11 +1,11 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import prettierConfig from 'eslint-config-prettier'
-import prettier from 'eslint-plugin-prettier'
-import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+import prettierConfig from 'eslint-config-prettier';
+import prettier from 'eslint-plugin-prettier';
+import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
 
 export default tseslint.config(
   { ignores: ['dist'] },
@@ -24,13 +24,14 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      ...prettierConfig.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'no-relative-import-paths/no-relative-import-paths': [
-        'warn',
-        { allowSameFolder: true, rootDir: 'src', prefix: '@' },
+        'error',
+        { allowSameFolder: false, rootDir: 'src', prefix: '@' },
       ],
       'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-)
+);

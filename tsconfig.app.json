@@ -19,7 +19,26 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/ui": ["./src/shared/ui"],
+      "@shared/utils": ["./src/shared/utils"],
+      "@shared": ["./src/shared"],
+      "@shared/*": ["./src/shared/*"],
+      "@entities": ["./src/entities"],
+      "@entities/*": ["./src/entities/*"],
+      "@features": ["./src/features"],
+      "@features/*": ["./src/features/*"],
+      "@widgets": ["./src/widgets"],
+      "@widgets/*": ["./src/widgets/*"],
+      "@pages": ["./src/pages"],
+      "@pages/*": ["./src/pages/*"],
+      "@app": ["./src/app"],
+      "@app/*": ["./src/app/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "vite-env.d.ts"]
 }
