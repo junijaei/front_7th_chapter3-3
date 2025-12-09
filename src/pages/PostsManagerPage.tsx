@@ -1,21 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '../components';
-import { Post, NewPost } from '../types/post.types';
-import { Comment, NewComment } from '../types/comment.types';
-import { User } from '../types/user.types';
-import { Tag } from '../types/tag.types';
-import { PostTable } from '../components/PostTable';
-import { PostAddDialog } from '../components/PostAddDialog';
-import { PostEditDialog } from '../components/PostEditDialog';
-import { PostDetailDialog } from '../components/PostDetailDialog';
-import { CommentAddDialog } from '../components/CommentAddDialog';
-import { CommentEditDialog } from '../components/CommentEditDialog';
-import { UserModal } from '../components/UserModal';
-import { SearchAndFilters } from '../components/SearchAndFilters';
-import { Pagination } from '../components/Pagination';
-import { highlightText } from '../utils';
+import { Button, Card, CardContent, CardHeader, CardTitle, Pagination } from '@shared/ui';
+import { highlightText } from '@shared/utils';
+import { Post, NewPost } from '@entities/post';
+import { Comment, NewComment } from '@entities/comment';
+import { User } from '@entities/user';
+import { Tag } from '@entities/tag';
+import { PostTable } from '@entities/post';
+import { PostAddDialog, PostEditDialog, PostDetailDialog, SearchAndFilters } from '@features/post';
+import { CommentAddDialog, CommentEditDialog } from '@features/comment';
+import { UserModal } from '@entities/user';
 
 const PostsManager = () => {
   const navigate = useNavigate();
