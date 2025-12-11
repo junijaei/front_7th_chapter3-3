@@ -1,17 +1,12 @@
 import { Comment, NewComment } from '@/entities/comment';
 
-export interface FetchCommentsResponse {
+export interface GetCommentsResponse {
   comments: Comment[];
   total: number;
 }
 
-export interface LikeCommentParams {
-  id: number;
-  currentLikes: number;
-}
-
 // 게시물별 댓글 조회
-export const fetchCommentsByPostId = async (postId: number): Promise<FetchCommentsResponse> => {
+export const getCommentsByPostId = async (postId: number): Promise<GetCommentsResponse> => {
   const response = await fetch(`/api/comments/post/${postId}`);
   if (!response.ok) throw new Error('댓글 조회 실패');
   return response.json();
@@ -45,15 +40,4 @@ export const deleteComment = async (id: number): Promise<void> => {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error('댓글 삭제 실패');
-};
-
-// 댓글 좋아요
-export const likeComment = async (params: LikeCommentParams): Promise<Comment> => {
-  const response = await fetch(`/api/comments/${params.id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ likes: params.currentLikes + 1 }),
-  });
-  if (!response.ok) throw new Error('댓글 좋아요 실패');
-  return response.json();
 };

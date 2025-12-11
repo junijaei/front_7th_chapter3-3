@@ -1,27 +1,27 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  fetchPosts,
+  getPosts,
   searchPosts,
-  fetchPostsByTag,
+  getPostsByTag,
   createPost,
   updatePost,
   deletePost,
-  FetchPostsParams,
-  FetchPostsResponse,
+  GetPostsParams,
+  GetPostsResponse,
   SearchPostsParams,
-  FetchPostsByTagResponse,
+  GetPostsByTagResponse,
 } from '@/entities/post/api/postApi';
 import { postKeys } from '@/entities/post/api/queryKeys';
 import { NewPost, Post } from '@/entities/post/model/post.types';
 
 // 게시물 목록 조회
-export const useFetchPosts = (
-  params: FetchPostsParams,
-  options?: Omit<UseQueryOptions<FetchPostsResponse>, 'queryKey' | 'queryFn'>,
+export const useGetPosts = (
+  params: GetPostsParams,
+  options?: Omit<UseQueryOptions<GetPostsResponse>, 'queryKey' | 'queryFn'>,
 ) => {
   return useQuery({
     queryKey: postKeys.list(params),
-    queryFn: () => fetchPosts(params),
+    queryFn: () => getPosts(params),
     ...options,
   });
 };
@@ -29,7 +29,7 @@ export const useFetchPosts = (
 // 게시물 검색
 export const useSearchPosts = (
   params: SearchPostsParams,
-  options?: Omit<UseQueryOptions<FetchPostsResponse>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<GetPostsResponse>, 'queryKey' | 'queryFn'>,
 ) => {
   return useQuery({
     queryKey: postKeys.search(params),
@@ -39,13 +39,13 @@ export const useSearchPosts = (
 };
 
 // 태그별 게시물 조회
-export const useFetchPostsByTag = (
+export const useGetPostsByTag = (
   tag: string,
-  options?: Omit<UseQueryOptions<FetchPostsByTagResponse>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<GetPostsByTagResponse>, 'queryKey' | 'queryFn'>,
 ) => {
   return useQuery({
     queryKey: postKeys.byTag(tag),
-    queryFn: () => fetchPostsByTag(tag),
+    queryFn: () => getPostsByTag(tag),
     ...options,
   });
 };

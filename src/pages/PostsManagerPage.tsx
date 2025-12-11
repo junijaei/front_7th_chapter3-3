@@ -1,68 +1,53 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
 import { Button, Card, CardContent, CardHeader, CardTitle, Pagination } from '@shared/ui';
 import { highlightText } from '@shared/utils';
+import { useUrlParams } from '@shared/lib/hooks';
+import {
+  showAddPostDialogAtom,
+  showEditPostDialogAtom,
+  showPostDetailDialogAtom,
+  selectedPostAtom,
+  newPostAtom,
+  showUserModalAtom,
+  selectedUserIdAtom,
+} from '@shared/model';
 import {
   Post,
-  NewPost,
-  useFetchPosts,
+  useGetPosts,
   useSearchPosts,
-  useFetchPostsByTag,
+  useGetPostsByTag,
   useCreatePost,
   useUpdatePost,
   useDeletePost,
   PostTable,
 } from '@entities/post';
-import {
-  Comment,
-  NewComment,
-  useFetchCommentsByPostId,
-  useCreateComment,
-  useUpdateComment,
-  useDeleteComment,
-  useLikeComment,
-} from '@entities/comment';
-import { User, useFetchUsers, useFetchUserById, UserModal } from '@entities/user';
-import { useFetchTags } from '@entities/tag';
+import { User, useGetUsers, UserModal } from '@entities/user';
+import { useGetTags } from '@entities/tag';
 import { PostAddDialog, PostEditDialog, PostDetailDialog, SearchAndFilters } from '@features/post';
-import { CommentAddDialog, CommentEditDialog } from '@features/comment';
 
 const PostsManager = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  // URL 파라미터 관리
+  const { params, updateUrl } = useUrlParams();
+  const { skip, limit, searchQuery, sortBy, order, selectedTag } = params;
 
-  // URL 파라미터 상태
-  const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
-  const [limit, setLimit] = useState(parseInt(queryParams.get('limit') || '10'));
-  const [searchQuery, setSearchQuery] = useState(queryParams.get('search') || '');
-  const [sortBy, setSortBy] = useState(queryParams.get('sortBy') || '');
-  const [sortOrder, setSortOrder] = useState(queryParams.get('sortOrder') || 'asc');
-  const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
-
-  // UI 상태
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
-  const [newPost, setNewPost] = useState<NewPost>({ title: '', body: '', userId: 1 });
-
-  // Comment UI 상태
-  const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
-  const [newComment, setNewComment] = useState<NewComment>({ body: '', postId: null, userId: 1 });
-  const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
-  const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
+  // Jotai atoms - UI 상태 관리
+  const [selectedPost, setSelectedPost] = useAtom(selectedPostAtom);
+  const [showAddDialog, setShowAddDialog] = useAtom(showAddPostDialogAtom);
+  const [showEditDialog, setShowEditDialog] = useAtom(showEditPostDialogAtom);
+  const [showPostDetailDialog, setShowPostDetailDialog] = useAtom(showPostDetailDialogAtom);
+  const [newPost, setNewPost] = useAtom(newPostAtom);
 
   // User UI 상태
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showUserModal, setShowUserModal] = useAtom(showUserModalAtom);
+  const [selectedUserId, setSelectedUserId] = useAtom(selectedUserIdAtom);
 
   // TanStack Query: Tags
-  const { data: tags = [] } = useFetchTags();
+  const { data: tags = [] } = useGetTags();
 
   // TanStack Query: Users
-  const { data: usersData } = useFetchUsers();
+  const { data: usersData } = useGetUsers();
   const users = usersData?.users || [];
 
   // TanStack Query: Posts (조건부)
@@ -74,8 +59,8 @@ const PostsManager = () => {
     data: postsData,
     isLoading: isLoadingPosts,
     refetch: refetchPosts,
-  } = useFetchPosts(
-    { limit, skip },
+  } = useGetPosts(
+    { limit, skip, sortBy, order },
     {
       enabled: shouldFetchPosts,
     },
@@ -91,7 +76,7 @@ const PostsManager = () => {
     data: tagData,
     isLoading: isLoadingByTag,
     refetch: refetchByTag,
-  } = useFetchPostsByTag(selectedTag, { enabled: shouldFetchByTag });
+  } = useGetPostsByTag(selectedTag, { enabled: shouldFetchByTag });
 
   // 현재 활성화된 데이터 소스 결정
   const currentData = shouldSearchPosts ? searchData : shouldFetchByTag ? tagData : postsData;
@@ -105,49 +90,14 @@ const PostsManager = () => {
       ...post,
       author: users.find((user: User) => user.id === post.userId),
     }));
-  }, [currentData?.posts, users]);
+  }, [currentData, users]);
 
   const total = currentData?.total || 0;
-
-  // TanStack Query: Comments (selectedPost가 있을 때만)
-  const { data: commentsData, refetch: refetchComments } = useFetchCommentsByPostId(
-    selectedPost?.id || 0,
-    {
-      enabled: !!selectedPost?.id && showPostDetailDialog,
-    },
-  );
-
-  const comments = useMemo(() => {
-    if (!selectedPost?.id || !commentsData?.comments) return {};
-    return { [selectedPost.id]: commentsData.comments };
-  }, [selectedPost?.id, commentsData?.comments]);
-
-  // TanStack Query: User Detail
-  const { data: selectedUser } = useFetchUserById(selectedUserId || 0, {
-    enabled: !!selectedUserId && showUserModal,
-  });
 
   // Mutations
   const createPostMutation = useCreatePost();
   const updatePostMutation = useUpdatePost();
   const deletePostMutation = useDeletePost();
-
-  const createCommentMutation = useCreateComment();
-  const updateCommentMutation = useUpdateComment();
-  const deleteCommentMutation = useDeleteComment();
-  const likeCommentMutation = useLikeComment();
-
-  // URL 업데이트 함수
-  const updateURL = () => {
-    const params = new URLSearchParams();
-    if (skip) params.set('skip', skip.toString());
-    if (limit) params.set('limit', limit.toString());
-    if (searchQuery) params.set('search', searchQuery);
-    if (sortBy) params.set('sortBy', sortBy);
-    if (sortOrder) params.set('sortOrder', sortOrder);
-    if (selectedTag) params.set('tag', selectedTag);
-    navigate(`?${params.toString()}`);
-  };
 
   // 게시물 검색
   const searchPosts = () => {
@@ -186,41 +136,6 @@ const PostsManager = () => {
     await deletePostMutation.mutateAsync(id);
   };
 
-  // 댓글 추가
-  const addComment = async () => {
-    await createCommentMutation.mutateAsync(newComment);
-    setShowAddCommentDialog(false);
-    setNewComment({ body: '', postId: null, userId: 1 });
-    refetchComments();
-  };
-
-  // 댓글 업데이트
-  const updateComment = async () => {
-    if (!selectedComment) return;
-    await updateCommentMutation.mutateAsync(selectedComment);
-    setShowEditCommentDialog(false);
-    refetchComments();
-  };
-
-  // 댓글 삭제
-  const deleteComment = async (id: number, postId: number) => {
-    await deleteCommentMutation.mutateAsync({ id, postId });
-    refetchComments();
-  };
-
-  // 댓글 좋아요
-  const likeComment = async (id: number, postId: number) => {
-    const comment = comments[postId]?.find((c) => c.id === id);
-    if (!comment) return;
-
-    await likeCommentMutation.mutateAsync({
-      id,
-      postId,
-      currentLikes: comment.likes,
-    });
-    refetchComments();
-  };
-
   // 게시물 상세 보기
   const openPostDetail = (post: Post) => {
     setSelectedPost(post);
@@ -232,22 +147,6 @@ const PostsManager = () => {
     setSelectedUserId(user.id);
     setShowUserModal(true);
   };
-
-  // URL 파라미터 변경 감지
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setSkip(parseInt(params.get('skip') || '0'));
-    setLimit(parseInt(params.get('limit') || '10'));
-    setSearchQuery(params.get('search') || '');
-    setSortBy(params.get('sortBy') || '');
-    setSortOrder(params.get('sortOrder') || 'asc');
-    setSelectedTag(params.get('tag') || '');
-  }, [location.search]);
-
-  // 파라미터 변경 시 URL 업데이트
-  useEffect(() => {
-    updateURL();
-  }, [skip, limit, sortBy, sortOrder, selectedTag]);
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
@@ -265,17 +164,17 @@ const PostsManager = () => {
           {/* 검색 및 필터 컨트롤 */}
           <SearchAndFilters
             searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            setSearchQuery={(q) => updateUrl({ searchQuery: q })}
             searchPosts={searchPosts}
             selectedTag={selectedTag}
-            setSelectedTag={setSelectedTag}
+            setSelectedTag={(tag) => updateUrl({ selectedTag: tag })}
             fetchPostsByTag={fetchPostsByTag}
-            updateURL={updateURL}
+            updateURL={() => {}}
             tags={tags}
             sortBy={sortBy}
-            setSortBy={setSortBy}
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortBy={(sb) => updateUrl({ sortBy: sb })}
+            order={order}
+            setOrder={(o) => updateUrl({ order: o as 'asc' | 'desc' })}
           />
 
           {/* 게시물 테이블 */}
@@ -286,8 +185,8 @@ const PostsManager = () => {
               posts={postsWithUsers}
               searchQuery={searchQuery}
               selectedTag={selectedTag}
-              setSelectedTag={setSelectedTag}
-              updateURL={updateURL}
+              setSelectedTag={(tag) => updateUrl({ selectedTag: tag })}
+              updateURL={() => {}}
               openPostDetail={openPostDetail}
               setSelectedPost={setSelectedPost}
               setShowEditDialog={setShowEditDialog}
@@ -300,9 +199,9 @@ const PostsManager = () => {
           {/* 페이지네이션 */}
           <Pagination
             limit={limit}
-            setLimit={setLimit}
+            setLimit={(l) => updateUrl({ limit: l })}
             skip={skip}
-            setSkip={setSkip}
+            setSkip={(s) => updateUrl({ skip: s })}
             total={total}
           />
         </div>
@@ -326,45 +225,19 @@ const PostsManager = () => {
         updatePost={updatePost}
       />
 
-      {/* 댓글 추가 대화상자 */}
-      <CommentAddDialog
-        showAddCommentDialog={showAddCommentDialog}
-        setShowAddCommentDialog={setShowAddCommentDialog}
-        newComment={newComment}
-        setNewComment={setNewComment}
-        addComment={addComment}
-      />
-
-      {/* 댓글 수정 대화상자 */}
-      <CommentEditDialog
-        showEditCommentDialog={showEditCommentDialog}
-        setShowEditCommentDialog={setShowEditCommentDialog}
-        selectedComment={selectedComment}
-        setSelectedComment={setSelectedComment}
-        updateComment={updateComment}
-      />
-
       {/* 게시물 상세 보기 대화상자 */}
       <PostDetailDialog
-        showPostDetailDialog={showPostDetailDialog}
-        setShowPostDetailDialog={setShowPostDetailDialog}
-        selectedPost={selectedPost}
+        isOpen={showPostDetailDialog}
+        onClose={() => setShowPostDetailDialog(false)}
+        post={selectedPost}
         searchQuery={searchQuery}
-        highlightText={highlightText}
-        comments={comments}
-        setNewComment={setNewComment}
-        setSelectedComment={setSelectedComment}
-        setShowAddCommentDialog={setShowAddCommentDialog}
-        setShowEditCommentDialog={setShowEditCommentDialog}
-        deleteComment={deleteComment}
-        likeComment={likeComment}
       />
 
       {/* 사용자 모달 */}
       <UserModal
-        showUserModal={showUserModal}
-        setShowUserModal={setShowUserModal}
-        selectedUser={selectedUser || null}
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
+        userId={selectedUserId}
       />
     </Card>
   );

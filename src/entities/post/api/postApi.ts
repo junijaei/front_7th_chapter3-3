@@ -1,11 +1,13 @@
 import { Post, NewPost } from '@/entities/post/model/post.types';
 
-export interface FetchPostsParams {
+export interface GetPostsParams {
   limit: number;
   skip: number;
+  sortBy?: string;
+  order?: 'asc' | 'desc';
 }
 
-export interface FetchPostsResponse {
+export interface GetPostsResponse {
   posts: Post[];
   total: number;
   skip: number;
@@ -16,27 +18,35 @@ export interface SearchPostsParams {
   q: string;
 }
 
-export interface FetchPostsByTagResponse {
+export interface GetPostsByTagResponse {
   posts: Post[];
   total: number;
 }
 
 // 게시물 목록 조회
-export const fetchPosts = async (params: FetchPostsParams): Promise<FetchPostsResponse> => {
-  const response = await fetch(`/api/posts?limit=${params.limit}&skip=${params.skip}`);
+export const getPosts = async (params: GetPostsParams): Promise<GetPostsResponse> => {
+  const url = new URLSearchParams({
+    limit: params.limit.toString(),
+    skip: params.skip.toString(),
+  });
+
+  if (params.sortBy) url.append('sortBy', params.sortBy);
+  if (params.order) url.append('order', params.order);
+
+  const response = await fetch(`/api/posts?${url.toString()}`);
   if (!response.ok) throw new Error('게시물 조회 실패');
   return response.json();
 };
 
 // 게시물 검색
-export const searchPosts = async (params: SearchPostsParams): Promise<FetchPostsResponse> => {
+export const searchPosts = async (params: SearchPostsParams): Promise<GetPostsResponse> => {
   const response = await fetch(`/api/posts/search?q=${params.q}`);
   if (!response.ok) throw new Error('게시물 검색 실패');
   return response.json();
 };
 
 // 태그별 게시물 조회
-export const fetchPostsByTag = async (tag: string): Promise<FetchPostsByTagResponse> => {
+export const getPostsByTag = async (tag: string): Promise<GetPostsByTagResponse> => {
   const response = await fetch(`/api/posts/tag/${tag}`);
   if (!response.ok) throw new Error('태그별 게시물 조회 실패');
   return response.json();

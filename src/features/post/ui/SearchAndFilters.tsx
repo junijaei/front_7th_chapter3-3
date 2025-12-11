@@ -13,8 +13,8 @@ interface SearchAndFiltersProps {
   tags: Tag[];
   sortBy: string;
   setSortBy: (sortBy: string) => void;
-  sortOrder: string;
-  setSortOrder: (sortOrder: string) => void;
+  order: string;
+  setOrder: (order: string) => void;
 }
 
 export const SearchAndFilters = ({
@@ -28,8 +28,8 @@ export const SearchAndFilters = ({
   tags,
   sortBy,
   setSortBy,
-  sortOrder,
-  setSortOrder,
+  order,
+  setOrder,
 }: SearchAndFiltersProps) => {
   return (
     <div className="flex gap-4">
@@ -76,7 +76,7 @@ export const SearchAndFilters = ({
           <SelectItem value="reactions">반응</SelectItem>
         </SelectContent>
       </Select>
-      <Select value={sortOrder} onValueChange={setSortOrder}>
+      <Select value={order} onValueChange={setOrder}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="정렬 순서" />
         </SelectTrigger>

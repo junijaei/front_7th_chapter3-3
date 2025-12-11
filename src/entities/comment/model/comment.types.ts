@@ -9,8 +9,4 @@ export interface Comment {
   likes: number;
 }
 
-export interface NewComment {
-  body: string;
-  postId: number | null;
-  userId: number;
-}
+export type NewComment = Omit<Comment, 'id' | 'user' | 'likes'>;

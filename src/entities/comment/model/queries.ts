@@ -1,24 +1,22 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import {
-  fetchCommentsByPostId,
+  getCommentsByPostId,
   createComment,
   updateComment,
   deleteComment,
-  likeComment,
-  LikeCommentParams,
-  FetchCommentsResponse,
+  GetCommentsResponse,
 } from '@entities/comment/api/commentApi';
 import { commentKeys } from '@entities/comment/api/queryKeys';
 import { Comment, NewComment } from '@entities/comment/model/comment.types';
 
 // 게시물별 댓글 조회
-export const useFetchCommentsByPostId = (
+export const useGetCommentsByPostId = (
   postId: number,
-  options?: Omit<UseQueryOptions<FetchCommentsResponse>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<GetCommentsResponse>, 'queryKey' | 'queryFn'>,
 ) => {
   return useQuery({
     queryKey: commentKeys.byPostId(postId),
-    queryFn: () => fetchCommentsByPostId(postId),
+    queryFn: () => getCommentsByPostId(postId),
     ...options,
   });
 };
@@ -59,20 +57,6 @@ export const useDeleteComment = () => {
 
   return useMutation({
     mutationFn: ({ id }: { id: number; postId: number }) => deleteComment(id),
-    onSuccess: (_, variables) => {
-      // 해당 게시물의 댓글 목록 무효화
-      queryClient.invalidateQueries({ queryKey: commentKeys.byPostId(variables.postId) });
-    },
-  });
-};
-
-// 댓글 좋아요
-export const useLikeComment = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (params: LikeCommentParams & { postId: number }) =>
-      likeComment({ id: params.id, currentLikes: params.currentLikes }),
     onSuccess: (_, variables) => {
       // 해당 게시물의 댓글 목록 무효화
       queryClient.invalidateQueries({ queryKey: commentKeys.byPostId(variables.postId) });
