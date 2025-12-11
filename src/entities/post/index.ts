@@ -1,6 +1,6 @@
 // Post entity exports
 export * from './model/post.types';
-export * from './ui/PostTable';
+export { PostTableView } from './ui/PostTableView';
 
 // TanStack Query
 export * from './model/queries';

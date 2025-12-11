@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { useAtom } from 'jotai';
-import { Button, Card, CardContent, CardHeader, CardTitle, Pagination } from '@shared/ui';
-import { highlightText } from '@shared/utils';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@shared/ui';
 import { useUrlParams } from '@shared/lib/hooks';
+import { Pagination } from '@widgets/pagination';
 import {
   showAddPostDialogAtom,
   showEditPostDialogAtom,
@@ -21,15 +21,16 @@ import {
   useCreatePost,
   useUpdatePost,
   useDeletePost,
-  PostTable,
 } from '@entities/post';
+import { PostsTable } from '@widgets/posts-table';
+import { SearchFilters } from '@widgets/search-filters';
 import { User, useGetUsers, UserModal } from '@entities/user';
 import { useGetTags } from '@entities/tag';
-import { PostAddDialog, PostEditDialog, PostDetailDialog, SearchAndFilters } from '@features/post';
+import { PostAddDialog, PostEditDialog, PostDetailDialog } from '@features/post';
 
 const PostsManager = () => {
   // URL 파라미터 관리
-  const { params, updateUrl } = useUrlParams();
+  const { params } = useUrlParams();
   const { skip, limit, searchQuery, sortBy, order, selectedTag } = params;
 
   // Jotai atoms - UI 상태 관리
@@ -162,48 +163,28 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <SearchAndFilters
-            searchQuery={searchQuery}
-            setSearchQuery={(q) => updateUrl({ searchQuery: q })}
-            searchPosts={searchPosts}
-            selectedTag={selectedTag}
-            setSelectedTag={(tag) => updateUrl({ selectedTag: tag })}
-            fetchPostsByTag={fetchPostsByTag}
-            updateURL={() => {}}
-            tags={tags}
-            sortBy={sortBy}
-            setSortBy={(sb) => updateUrl({ sortBy: sb })}
-            order={order}
-            setOrder={(o) => updateUrl({ order: o as 'asc' | 'desc' })}
-          />
+          <SearchFilters tags={tags} onSearch={searchPosts} onTagChange={fetchPostsByTag} />
 
           {/* 게시물 테이블 */}
           {isLoading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
-            <PostTable
+            <PostsTable
               posts={postsWithUsers}
               searchQuery={searchQuery}
               selectedTag={selectedTag}
-              setSelectedTag={(tag) => updateUrl({ selectedTag: tag })}
-              updateURL={() => {}}
-              openPostDetail={openPostDetail}
-              setSelectedPost={setSelectedPost}
-              setShowEditDialog={setShowEditDialog}
-              deletePost={deletePost}
-              openUserModal={openUserModal}
-              highlightText={highlightText}
+              onPostDetail={openPostDetail}
+              onPostEdit={(post) => {
+                setSelectedPost(post);
+                setShowEditDialog(true);
+              }}
+              onPostDelete={deletePost}
+              onUserClick={openUserModal}
             />
           )}
 
           {/* 페이지네이션 */}
-          <Pagination
-            limit={limit}
-            setLimit={(l) => updateUrl({ limit: l })}
-            skip={skip}
-            setSkip={(s) => updateUrl({ skip: s })}
-            total={total}
-          />
+          <Pagination total={total} />
         </div>
       </CardContent>
 

@@ -1,36 +1,39 @@
 import { Search } from 'lucide-react';
 import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui';
 import { Tag } from '@entities/tag';
+import { useUrlParams } from '@shared/lib/hooks';
 
-interface SearchAndFiltersProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchPosts: () => void;
-  selectedTag: string;
-  setSelectedTag: (tag: string) => void;
-  fetchPostsByTag: (tag: string) => void;
-  updateURL: () => void;
+interface SearchFiltersProps {
   tags: Tag[];
-  sortBy: string;
-  setSortBy: (sortBy: string) => void;
-  order: string;
-  setOrder: (order: string) => void;
+  onSearch?: () => void;
+  onTagChange?: (tag: string) => void;
 }
 
-export const SearchAndFilters = ({
-  searchQuery,
-  setSearchQuery,
-  searchPosts,
-  selectedTag,
-  setSelectedTag,
-  fetchPostsByTag,
-  updateURL,
-  tags,
-  sortBy,
-  setSortBy,
-  order,
-  setOrder,
-}: SearchAndFiltersProps) => {
+export const SearchFilters = ({ tags, onSearch, onTagChange }: SearchFiltersProps) => {
+  const { params, updateUrl } = useUrlParams();
+  const { searchQuery, selectedTag, sortBy, order } = params;
+
+  const handleSearchQueryChange = (value: string) => {
+    updateUrl({ searchQuery: value });
+  };
+
+  const handleSearch = () => {
+    onSearch?.();
+  };
+
+  const handleTagChange = (value: string) => {
+    updateUrl({ selectedTag: value, skip: 0 });
+    onTagChange?.(value);
+  };
+
+  const handleSortByChange = (value: string) => {
+    updateUrl({ sortBy: value });
+  };
+
+  const handleOrderChange = (value: string) => {
+    updateUrl({ order: value as 'asc' | 'desc' });
+  };
+
   return (
     <div className="flex gap-4">
       <div className="flex-1">
@@ -40,19 +43,12 @@ export const SearchAndFilters = ({
             placeholder="게시물 검색..."
             className="pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && searchPosts()}
+            onChange={(e) => handleSearchQueryChange(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
         </div>
       </div>
-      <Select
-        value={selectedTag}
-        onValueChange={(value) => {
-          setSelectedTag(value);
-          fetchPostsByTag(value);
-          updateURL();
-        }}
-      >
+      <Select value={selectedTag} onValueChange={handleTagChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="태그 선택" />
         </SelectTrigger>
@@ -65,7 +61,7 @@ export const SearchAndFilters = ({
           ))}
         </SelectContent>
       </Select>
-      <Select value={sortBy} onValueChange={setSortBy}>
+      <Select value={sortBy} onValueChange={handleSortByChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="정렬 기준" />
         </SelectTrigger>
@@ -76,7 +72,7 @@ export const SearchAndFilters = ({
           <SelectItem value="reactions">반응</SelectItem>
         </SelectContent>
       </Select>
-      <Select value={order} onValueChange={setOrder}>
+      <Select value={order} onValueChange={handleOrderChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="정렬 순서" />
         </SelectTrigger>

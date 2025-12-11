@@ -4,33 +4,29 @@ import { Post } from '@entities/post';
 import { User } from '@entities/user';
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui';
 
-interface PostTableProps {
+interface PostTableViewProps {
   posts: Post[];
-  searchQuery: string;
-  selectedTag: string;
-  setSelectedTag: (tag: string) => void;
-  updateURL: () => void;
-  openPostDetail: (post: Post) => void;
-  setSelectedPost: (post: Post) => void;
-  setShowEditDialog: (show: boolean) => void;
-  deletePost: (id: number) => void;
-  openUserModal: (user: User) => void;
-  highlightText: (text: string, highlight: string) => ReactElement | null;
+  searchQuery?: string;
+  selectedTag?: string;
+  onRowClick: (post: Post) => void;
+  onEdit: (post: Post) => void;
+  onDelete: (postId: number) => void;
+  onTagClick: (tag: string) => void;
+  onUserClick: (user: User) => void;
+  renderHighlight: (text: string, highlight: string) => ReactElement | null;
 }
 
-export const PostTable = ({
+export const PostTableView = ({
   posts,
-  searchQuery,
-  selectedTag,
-  setSelectedTag,
-  updateURL,
-  openPostDetail,
-  setSelectedPost,
-  setShowEditDialog,
-  deletePost,
-  openUserModal,
-  highlightText,
-}: PostTableProps) => {
+  searchQuery = '',
+  selectedTag = '',
+  onRowClick,
+  onEdit,
+  onDelete,
+  onTagClick,
+  onUserClick,
+  renderHighlight,
+}: PostTableViewProps) => {
   return (
     <Table>
       <TableHeader>
@@ -48,7 +44,7 @@ export const PostTable = ({
             <TableCell>{post.id}</TableCell>
             <TableCell>
               <div className="space-y-1">
-                <div>{highlightText(post.title, searchQuery)}</div>
+                <div>{renderHighlight(post.title, searchQuery)}</div>
 
                 <div className="flex flex-wrap gap-1">
                   {post.tags?.map((tag) => (
@@ -59,10 +55,7 @@ export const PostTable = ({
                           ? 'text-white bg-blue-500 hover:bg-blue-600'
                           : 'text-blue-800 bg-blue-100 hover:bg-blue-200'
                       }`}
-                      onClick={() => {
-                        setSelectedTag(tag);
-                        updateURL();
-                      }}
+                      onClick={() => onTagClick(tag)}
                     >
                       {tag}
                     </span>
@@ -73,7 +66,7 @@ export const PostTable = ({
             <TableCell>
               <div
                 className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => openUserModal(post.author!)}
+                onClick={() => post.author && onUserClick(post.author)}
               >
                 <img
                   src={post.author?.image}
@@ -93,20 +86,13 @@ export const PostTable = ({
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
+                <Button variant="ghost" size="sm" onClick={() => onRowClick(post)}>
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedPost(post);
-                    setShowEditDialog(true);
-                  }}
-                >
+                <Button variant="ghost" size="sm" onClick={() => onEdit(post)}>
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>
+                <Button variant="ghost" size="sm" onClick={() => onDelete(post.id)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
