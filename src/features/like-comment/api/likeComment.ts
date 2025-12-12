@@ -1,4 +1,5 @@
 import { Comment } from '@entities/comment';
+import { API_BASE_URL } from '@/shared/api';
 
 export interface LikeCommentParams {
   id: number;
@@ -7,7 +8,7 @@ export interface LikeCommentParams {
 
 // 댓글 좋아요 (비즈니스 액션)
 export const likeComment = async (params: LikeCommentParams): Promise<Comment> => {
-  const response = await fetch(`/api/comments/${params.id}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/${params.id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ likes: params.currentLikes + 1 }),
