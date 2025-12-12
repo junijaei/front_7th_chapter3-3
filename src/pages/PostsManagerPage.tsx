@@ -9,24 +9,18 @@ import {
   showEditPostDialogAtom,
   showPostDetailDialogAtom,
   selectedPostAtom,
-  newPostAtom,
   showUserModalAtom,
   selectedUserIdAtom,
 } from '@shared/model';
-import {
-  Post,
-  useGetPosts,
-  useSearchPosts,
-  useGetPostsByTag,
-  useCreatePost,
-  useUpdatePost,
-  useDeletePost,
-} from '@entities/post';
+import { Post, useGetPosts, useSearchPosts, useGetPostsByTag } from '@entities/post';
 import { PostsTable } from '@widgets/posts-table';
 import { SearchFilters } from '@widgets/search-filters';
 import { User, useGetUsers, UserModal } from '@entities/user';
 import { useGetTags } from '@entities/tag';
-import { PostAddDialog, PostEditDialog, PostDetailDialog } from '@features/post';
+import { PostAddDialog } from '@features/create-post';
+import { PostEditDialog } from '@features/update-post';
+import { PostDetailDialog } from '@features/post-detail';
+import { useDeletePostFeature } from '@features/delete-post';
 
 const PostsManager = () => {
   // URL 파라미터 관리
@@ -38,7 +32,6 @@ const PostsManager = () => {
   const [showAddDialog, setShowAddDialog] = useAtom(showAddPostDialogAtom);
   const [showEditDialog, setShowEditDialog] = useAtom(showEditPostDialogAtom);
   const [showPostDetailDialog, setShowPostDetailDialog] = useAtom(showPostDetailDialogAtom);
-  const [newPost, setNewPost] = useAtom(newPostAtom);
 
   // User UI 상태
   const [showUserModal, setShowUserModal] = useAtom(showUserModalAtom);
@@ -49,7 +42,6 @@ const PostsManager = () => {
 
   // TanStack Query: Users
   const { data: usersData } = useGetUsers();
-  const users = usersData?.users || [];
 
   // TanStack Query: Posts (조건부)
   const shouldFetchPosts = !searchQuery && (!selectedTag || selectedTag === 'all');
@@ -85,20 +77,19 @@ const PostsManager = () => {
 
   // Posts와 Users 조합
   const postsWithUsers = useMemo(() => {
+    const users = usersData?.users || [];
     if (!currentData?.posts || !users.length) return [];
 
     return currentData.posts.map((post) => ({
       ...post,
       author: users.find((user: User) => user.id === post.userId),
     }));
-  }, [currentData, users]);
+  }, [currentData, usersData]);
 
   const total = currentData?.total || 0;
 
-  // Mutations
-  const createPostMutation = useCreatePost();
-  const updatePostMutation = useUpdatePost();
-  const deletePostMutation = useDeletePost();
+  // Feature Hooks
+  const { deletePost } = useDeletePostFeature();
 
   // 게시물 검색
   const searchPosts = () => {
@@ -118,23 +109,9 @@ const PostsManager = () => {
     refetchByTag();
   };
 
-  // 게시물 추가
-  const addPost = async () => {
-    await createPostMutation.mutateAsync(newPost);
-    setShowAddDialog(false);
-    setNewPost({ title: '', body: '', userId: 1 });
-  };
-
-  // 게시물 업데이트
-  const updatePost = async () => {
-    if (!selectedPost) return;
-    await updatePostMutation.mutateAsync(selectedPost);
-    setShowEditDialog(false);
-  };
-
   // 게시물 삭제
-  const deletePost = async (id: number) => {
-    await deletePostMutation.mutateAsync(id);
+  const handleDeletePost = async (id: number) => {
+    await deletePost(id);
   };
 
   // 게시물 상세 보기
@@ -178,7 +155,7 @@ const PostsManager = () => {
                 setSelectedPost(post);
                 setShowEditDialog(true);
               }}
-              onPostDelete={deletePost}
+              onPostDelete={handleDeletePost}
               onUserClick={openUserModal}
             />
           )}
@@ -189,22 +166,10 @@ const PostsManager = () => {
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <PostAddDialog
-        showAddDialog={showAddDialog}
-        setShowAddDialog={setShowAddDialog}
-        newPost={newPost}
-        setNewPost={setNewPost}
-        addPost={addPost}
-      />
+      <PostAddDialog isOpen={showAddDialog} onClose={() => setShowAddDialog(false)} />
 
       {/* 게시물 수정 대화상자 */}
-      <PostEditDialog
-        showEditDialog={showEditDialog}
-        setShowEditDialog={setShowEditDialog}
-        selectedPost={selectedPost}
-        setSelectedPost={setSelectedPost}
-        updatePost={updatePost}
-      />
+      <PostEditDialog isOpen={showEditDialog} onClose={() => setShowEditDialog(false)} />
 
       {/* 게시물 상세 보기 대화상자 */}
       <PostDetailDialog

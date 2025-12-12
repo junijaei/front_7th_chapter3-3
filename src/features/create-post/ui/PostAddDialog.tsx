@@ -1,4 +1,5 @@
-import { NewPost } from '@entities/post';
+import { useAtom } from 'jotai';
+import { newPostAtom } from '@shared/model';
 import {
   Button,
   Dialog,
@@ -8,24 +9,23 @@ import {
   Input,
   Textarea,
 } from '@shared/ui';
+import { useCreatePostFeature } from '@/features/create-post/model/useCreatePostFeature';
 
 interface PostAddDialogProps {
-  showAddDialog: boolean;
-  setShowAddDialog: (show: boolean) => void;
-  newPost: NewPost;
-  setNewPost: (post: NewPost) => void;
-  addPost: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const PostAddDialog = ({
-  showAddDialog,
-  setShowAddDialog,
-  newPost,
-  setNewPost,
-  addPost,
-}: PostAddDialogProps) => {
+export const PostAddDialog = ({ isOpen, onClose }: PostAddDialogProps) => {
+  const [newPost, setNewPost] = useAtom(newPostAtom);
+  const { createPost, isLoading } = useCreatePostFeature();
+
+  const handleSubmit = async () => {
+    await createPost(newPost);
+  };
+
   return (
-    <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>새 게시물 추가</DialogTitle>
@@ -48,7 +48,9 @@ export const PostAddDialog = ({
             value={newPost.userId}
             onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
           />
-          <Button onClick={addPost}>게시물 추가</Button>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? '추가 중...' : '게시물 추가'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

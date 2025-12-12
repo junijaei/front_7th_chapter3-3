@@ -1,4 +1,5 @@
-import { Post } from '@entities/post';
+import { useAtom } from 'jotai';
+import { selectedPostAtom } from '@shared/model';
 import {
   Button,
   Dialog,
@@ -8,24 +9,24 @@ import {
   Input,
   Textarea,
 } from '@shared/ui';
+import { useUpdatePostFeature } from '@/features/update-post/model/useUpdatePostFeature';
 
 interface PostEditDialogProps {
-  showEditDialog: boolean;
-  setShowEditDialog: (show: boolean) => void;
-  selectedPost: Post | null;
-  setSelectedPost: (post: Post) => void;
-  updatePost: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const PostEditDialog = ({
-  showEditDialog,
-  setShowEditDialog,
-  selectedPost,
-  setSelectedPost,
-  updatePost,
-}: PostEditDialogProps) => {
+export const PostEditDialog = ({ isOpen, onClose }: PostEditDialogProps) => {
+  const [selectedPost, setSelectedPost] = useAtom(selectedPostAtom);
+  const { updatePost, isLoading } = useUpdatePostFeature();
+
+  const handleSubmit = async () => {
+    if (!selectedPost) return;
+    await updatePost(selectedPost);
+  };
+
   return (
-    <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>게시물 수정</DialogTitle>
@@ -42,7 +43,9 @@ export const PostEditDialog = ({
             value={selectedPost?.body || ''}
             onChange={(e) => setSelectedPost({ ...selectedPost!, body: e.target.value })}
           />
-          <Button onClick={updatePost}>게시물 업데이트</Button>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? '수정 중...' : '게시물 업데이트'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

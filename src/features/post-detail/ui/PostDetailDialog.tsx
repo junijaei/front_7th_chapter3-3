@@ -1,21 +1,11 @@
 import { useAtom } from 'jotai';
 import { Post } from '@entities/post';
-import {
-  Comment,
-  useGetCommentsByPostId,
-  useDeleteComment,
-  useCreateComment,
-  useUpdateComment,
-} from '@entities/comment';
-import { useLikeComment } from '@features/comment';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Button,
-  Textarea,
-} from '@shared/ui';
+import { Comment, useGetCommentsByPostId } from '@entities/comment';
+import { useLikeComment } from '@features/like-comment';
+import { useCreateComment } from '@features/create-comment';
+import { useUpdateComment } from '@features/update-comment';
+import { useDeleteComment } from '@features/delete-comment';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Textarea } from '@shared/ui';
 import { highlightText } from '@shared/utils';
 import { Comments } from '@entities/comment/ui/Comments';
 import {
@@ -49,11 +39,11 @@ export const PostDetailDialog = ({
     enabled: !!post?.id && isOpen,
   });
 
-  // Mutations
-  const deleteCommentMutation = useDeleteComment();
+  // Feature Hooks
   const likeCommentMutation = useLikeComment();
   const createCommentMutation = useCreateComment();
   const updateCommentMutation = useUpdateComment();
+  const deleteCommentMutation = useDeleteComment();
 
   const comments = commentsData?.comments || [];
 
@@ -131,7 +121,7 @@ export const PostDetailDialog = ({
       </Dialog>
 
       {/* 댓글 추가 다이얼로그 */}
-      <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
+      <Dialog open={showAddCommentDialog} onOpenChange={(open) => setShowAddCommentDialog(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>새 댓글 추가</DialogTitle>
@@ -148,7 +138,7 @@ export const PostDetailDialog = ({
       </Dialog>
 
       {/* 댓글 수정 다이얼로그 */}
-      <Dialog open={showEditCommentDialog} onOpenChange={setShowEditCommentDialog}>
+      <Dialog open={showEditCommentDialog} onOpenChange={(open) => setShowEditCommentDialog(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>댓글 수정</DialogTitle>
@@ -157,9 +147,7 @@ export const PostDetailDialog = ({
             <Textarea
               placeholder="댓글 내용"
               value={selectedComment?.body || ''}
-              onChange={(e) =>
-                setSelectedComment({ ...selectedComment!, body: e.target.value })
-              }
+              onChange={(e) => setSelectedComment({ ...selectedComment!, body: e.target.value })}
             />
             <Button onClick={handleUpdateComment}>댓글 업데이트</Button>
           </div>
