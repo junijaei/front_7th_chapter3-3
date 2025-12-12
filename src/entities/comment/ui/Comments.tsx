@@ -1,4 +1,4 @@
-import { Edit2, Plus, ThumbsUp, Trash2 } from 'lucide-react';
+import { Edit2, ThumbsUp, Trash2 } from 'lucide-react';
 import { Button } from '@shared/ui';
 import { highlightText } from '@shared/utils';
 import { Comment } from '@entities/comment';
@@ -7,7 +7,7 @@ interface CommentsProps {
   comments: Comment[];
   postId: number;
   searchQuery: string;
-  onAddComment: () => void;
+  addCommentSlot?: React.ReactNode; // Slot Pattern: 외부에서 댓글 추가 UI 주입
   onEditComment: (comment: Comment) => void;
   onDeleteComment: (commentId: number) => void;
   onLikeComment: (commentId: number) => void;
@@ -16,7 +16,7 @@ interface CommentsProps {
 export const Comments = ({
   comments,
   searchQuery,
-  onAddComment,
+  addCommentSlot,
   onEditComment,
   onDeleteComment,
   onLikeComment,
@@ -25,10 +25,7 @@ export const Comments = ({
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold">댓글</h3>
-        <Button size="sm" onClick={onAddComment}>
-          <Plus className="w-3 h-3 mr-1" />
-          댓글 추가
-        </Button>
+        {addCommentSlot}
       </div>
       <div className="space-y-1">
         {comments.map((comment) => (
