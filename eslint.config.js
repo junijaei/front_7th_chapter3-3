@@ -8,7 +8,7 @@ import prettier from 'eslint-plugin-prettier';
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', '.history'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettierConfig],
     files: ['**/*.{ts,tsx}'],
