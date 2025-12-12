@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai';
-import { newPostAtom } from '@shared/model';
+import { newPostAtom } from '../model/atoms';
 import {
   Button,
   Dialog,

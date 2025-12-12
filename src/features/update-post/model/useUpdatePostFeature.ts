@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import { updatePost } from '@entities/post/api/postApi';
 import { postKeys } from '@entities/post';
-import { showEditPostDialogAtom } from '@shared/model';
+import { showEditPostDialogAtom } from './atoms';
 import { Post } from '@entities/post';
 import { handleMutationSuccess, handleMutationError } from '@shared/lib/error';
 

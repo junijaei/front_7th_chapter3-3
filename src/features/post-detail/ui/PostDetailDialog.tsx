@@ -1,19 +1,13 @@
 import { useAtom } from 'jotai';
 import { Post } from '@entities/post';
-import { Comment, useGetCommentsByPostId } from '@entities/comment';
+import { Comment, useGetCommentsByPostId, selectedCommentAtom } from '@entities/comment';
 import { useLikeComment } from '@features/like-comment';
-import { useCreateComment } from '@features/create-comment';
-import { useUpdateComment } from '@features/update-comment';
+import { useCreateComment, showAddCommentDialogAtom, newCommentAtom } from '@features/create-comment';
+import { useUpdateComment, showEditCommentDialogAtom } from '@features/update-comment';
 import { useDeleteComment } from '@features/delete-comment';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Textarea } from '@shared/ui';
 import { highlightText } from '@shared/utils';
 import { Comments } from '@entities/comment/ui/Comments';
-import {
-  showAddCommentDialogAtom,
-  showEditCommentDialogAtom,
-  selectedCommentAtom,
-  newCommentAtom,
-} from '@shared/model';
 
 interface PostDetailDialogProps {
   isOpen: boolean;

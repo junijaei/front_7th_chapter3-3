@@ -4,18 +4,13 @@ import { useAtom } from 'jotai';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@shared/ui';
 import { useUrlParams } from '@shared/lib/hooks';
 import { Pagination } from '@widgets/pagination';
-import {
-  showAddPostDialogAtom,
-  showEditPostDialogAtom,
-  showPostDetailDialogAtom,
-  selectedPostAtom,
-  showUserModalAtom,
-  selectedUserIdAtom,
-} from '@shared/model';
-import { Post, useGetPosts, useSearchPosts, useGetPostsByTag } from '@entities/post';
+import { Post, useGetPosts, useSearchPosts, useGetPostsByTag, selectedPostAtom } from '@entities/post';
+import { showAddPostDialogAtom } from '@features/create-post';
+import { showEditPostDialogAtom } from '@features/update-post';
+import { showPostDetailDialogAtom } from '@features/post-detail';
 import { PostsTable } from '@widgets/posts-table';
 import { SearchFilters } from '@widgets/search-filters';
-import { User, useGetUsers, UserModal } from '@entities/user';
+import { User, useGetUsers, UserModal, showUserModalAtom, selectedUserIdAtom } from '@entities/user';
 import { useGetTags } from '@entities/tag';
 import { PostAddDialog } from '@features/create-post';
 import { PostEditDialog } from '@features/update-post';

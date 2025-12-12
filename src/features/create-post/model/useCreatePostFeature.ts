@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import { useCreatePost } from '@entities/post';
-import { showAddPostDialogAtom, newPostAtom } from '@shared/model';
+import { showAddPostDialogAtom, newPostAtom } from './atoms';
 import { NewPost } from '@entities/post';
 import { handleMutationSuccess, handleMutationError } from '@shared/lib/error';
 
